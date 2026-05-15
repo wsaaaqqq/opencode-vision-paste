@@ -43,6 +43,33 @@ function opencodeJsonPath() {
   return join(process.cwd(), ".opencode", "opencode.jsonc")
 }
 
+const VL_BACKENDS = [
+  { label: "Ollama", url: "http://localhost:11434/v1", models: ["llava", "minicpm-v", "qwen2.5-vl"] },
+  { label: "llama.cpp", url: "http://localhost:8080/v1", models: ["Qwen3VL-8B-Instruct-Q4_K_M.gguf"] },
+  { label: "vLLM", url: "http://localhost:8000/v1", models: ["Qwen2-VL-7B-Instruct"] },
+  { label: "LM Studio", url: "http://localhost:1234/v1", models: ["llava-v1.6"] },
+]
+
+async function detectVLBackends() {
+  const found = []
+  for (const be of VL_BACKENDS) {
+    try {
+      const res = await fetch(be.url.replace(/\/+$/, "") + "/models", {
+        signal: AbortSignal.timeout(2000),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        const entries = data.data || data.models || data || []
+        const models = Array.isArray(entries)
+          ? entries.map(m => typeof m === "string" ? m : m.id || m.name).filter(Boolean)
+          : []
+        found.push({ ...be, models })
+      }
+    } catch {}
+  }
+  return found
+}
+
 async function prompt(q, defaultVal = "") {
   const rl = createInterface({ input: stdin, output: stdout })
   const suffix = defaultVal ? ` [${defaultVal}]` : ""
@@ -125,9 +152,32 @@ program
   .action(async (opts) => {
     console.log("\n  opencode-vision-paste setup wizard\n")
 
-    let cfg = { ...DEFAULT_CONFIG }
+    const cfg = { ...DEFAULT_CONFIG }
 
+    // Auto-detect running VL backends
     if (!opts.yes) {
+      const detected = await detectVLBackends()
+      if (detected.length > 0) {
+        console.log("  Detected VL backends:\n")
+        detected.forEach((be, i) => {
+          const models = be.models.slice(0, 5).join(", ")
+          console.log(`    ${i + 1}. ${be.label.padEnd(12)} ${be.url} (${models})`)
+        })
+        const use = await prompt("\n  Use detected backend? (enter number, or skip)", "")
+        const idx = parseInt(use) - 1
+        if (detected[idx]) {
+          cfg.apiBaseUrl = detected[idx].url
+          if (detected[idx].models.length > 0) {
+            cfg.apiModel = detected[idx].models[0]
+          }
+          console.log(`  ✓ Using ${detected[idx].label}: ${cfg.apiBaseUrl} → ${cfg.apiModel}\n`)
+          // Skip manual Steps 1-2 since we auto-filled
+          opts._detected = true
+        }
+      }
+    }
+
+    if (!opts.yes && !opts._detected) {
       // Step 1: VL API endpoint
       console.log("  Step 1: VL API endpoint")
       cfg.apiBaseUrl = await prompt("VL API URL", cfg.apiBaseUrl)
@@ -135,7 +185,9 @@ program
       // Step 2: Model
       console.log("\n  Step 2: Vision model")
       cfg.apiModel = await prompt("Model name", cfg.apiModel)
+    }
 
+    if (!opts.yes) {
       // Step 3: API key
       console.log("\n  Step 3: API key (leave blank if not required)")
       const key = await prompt("API key", "")
