@@ -4,8 +4,17 @@
   "description": "OpenCode plugin: intercept pasted images → local VL API analysis → replace with text",
   "type": "module",
   "main": "vision-paste.mjs",
-  "files": ["vision-paste.mjs"],
+  "bin": {
+    "opencode-vision-paste": "cli.mjs"
+  },
+  "files": [
+    "vision-paste.mjs",
+    "cli.mjs",
+    "docker-compose.yml",
+    "examples/"
+  ],
   "engines": {
+    "node": ">=18",
     "opencode": ">=0.1.0"
   },
   "scripts": {
@@ -29,5 +38,8 @@
     "url": "https://github.com/wsaaaqqq/opencode-vision-paste/issues"
   },
   "homepage": "https://github.com/wsaaaqqq/opencode-vision-paste#readme",
-  "author": ""
+  "author": "",
+  "dependencies": {
+    "commander": "^14.0.3"
+  }
 }
