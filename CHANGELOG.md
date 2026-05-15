@@ -4,6 +4,26 @@ All notable changes to opencode-vision-paste will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.2.0] - 2026-05-16
+
+### Added
+
+- **CLI tool**: `npx opencode-vision-paste init|doctor|config`
+- **Auto-detection**: `init` detects running VL backends (Ollama, llama.cpp, vLLM, LM Studio)
+- **Doctor command**: 4 diagnostic checks (system/config/plugin/api) with `--json` and `--verbose` flags
+- **Startup health check**: pings VL API on `session.created`, warns in chat if unreachable
+- **Smart error feedback**: classified API errors with specific fix suggestions
+- **Multi-language prompts**: 9 built-in prompt templates via `promptLocale` config
+- **Docker Compose**: one-command VL API setup
+- **Example configs**: presets for Ollama, llama.cpp, vLLM
+- **New config options**: `promptLocale`, `healthCheckOnStart`, `verbose`, `errorHints`
+- **FAQ section** in README
+
+### Changed
+
+- CLI now uses Commander.js (single runtime dependency)
+- `promptLocale` replaces hardcoded `promptTemplate` default
+
 ## [0.1.0] - 2026-05-15
 
 ### Added
