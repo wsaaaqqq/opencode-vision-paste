@@ -39,6 +39,12 @@ Priority (first found wins):
 - **Default**: `请用中文详细描述这张图片的内容。{userText}`
 - **Description**: Prompt sent to the vision model. `{userText}` is replaced with the user's original message text. Change this to your preferred language or style.
 
+### `promptLocale`
+
+- **Type**: `string`
+- **Default**: `zh`
+- **Description**: Built-in prompt language code. Supported: `en`, `zh`, `ja`, `ko`, `es`, `fr`, `de`, `ru`, `pt`. Overridden by `promptTemplate` if set.
+
 ### `skipIfModelSupportsVision`
 
 - **Type**: `boolean`

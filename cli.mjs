@@ -115,10 +115,7 @@ async function resolveConfig() {
   for (const { path, label } of paths) {
     try {
       const raw = await readFile(path, "utf-8")
-      const json = raw
-        .replace(/\/\/.*$/gm, "")
-        .replace(/\/\*[\s\S]*?\*\//g, "")
-        .trim()
+      const json = stripJsoncComments(raw)
       return { config: { ...DEFAULT_CONFIG, ...JSON.parse(json) }, source: label, path }
     } catch {
       continue
@@ -126,6 +123,25 @@ async function resolveConfig() {
   }
 
   return { config: { ...DEFAULT_CONFIG }, source: "built-in defaults", path: null }
+}
+
+function stripJsoncComments(text) {
+  let out = text.replace(/\/\*[\s\S]*?\*\//g, "")
+  const lines = out.split("\n")
+  out = ""
+  for (const line of lines) {
+    let inString = false, escaped = false
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i]
+      if (escaped) { out += ch; escaped = false; continue }
+      if (ch === "\\") { out += ch; escaped = true; continue }
+      if (ch === '"') { inString = !inString; out += ch; continue }
+      if (!inString && ch === "/" && line[i + 1] === "/") break
+      out += ch
+    }
+    out += "\n"
+  }
+  return out.trim()
 }
 
 function printConfig(cfg) {
@@ -144,7 +160,7 @@ const program = new Command()
 program
   .name("opencode-vision-paste")
   .description("OpenCode vision paste plugin CLI")
-  .version("0.2.0")
+  .version("0.3.0")
 
 program
   .command("init")

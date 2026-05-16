@@ -4,6 +4,22 @@ All notable changes to opencode-vision-paste will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.3.0] - 2026-05-16
+
+### Added
+
+- **Comprehensive test suite**: 30-day testing plan with 200+ test cases
+- **Test harness**: Mock VL API server, assertion utilities, test fixtures
+- **Bug fix**: Handle messages without `parts` array gracefully
+- **Bug fix**: JSONC comment stripping now preserves `://` in URLs
+- **Documentation**: Added `promptLocale` to CONFIGURATION.md
+
+### Fixed
+
+- JSONC parsing in CLI `resolveConfig()` — no longer strips `//` in URLs like `http://`
+- Message handling — gracefully handles messages without `parts` array
+- Test JSONC parsing — all tests now correctly parse JSONC config files
+
 ## [0.2.0] - 2026-05-16
 
 ### Added

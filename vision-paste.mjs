@@ -261,6 +261,8 @@ export default async function (input) {
       const last = userMessages[userMessages.length - 1]
       const userMsg = last.msg
 
+      if (!userMsg.parts || userMsg.parts.length === 0) { log("HOOK exit: no parts"); return }
+
       log("USER_MSG", { role: userMsg.info?.role, partsCount: userMsg.parts.length })
       for (let i = 0; i < userMsg.parts.length; i++) {
         const p = userMsg.parts[i]
